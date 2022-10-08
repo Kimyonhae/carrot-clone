@@ -1,0 +1,83 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["referentialIntegrity"] //다른 객체를 연결할때 그 객체가 존재하길 희망하는 코드
+}
+
+datasource db {
+  provider             = "mysql"
+  url                  = env("DATABASE_URL")
+  referentialIntegrity = "prisma"
+}
+
+model User {
+  id        Int       @id @default(autoincrement())
+  createAt  DateTime  @default(now())
+  updateAt  DateTime  @updatedAt
+  name      String    @db.MediumText
+  avatar    String?
+  introduce String    @db.MediumText
+  LoginId   String    @unique
+  password  String?
+  Products  Product[]
+  Chats     Chats[]
+  Favs      Fav[]
+  Todos     Todos[]
+}
+
+model Todos {
+  id       Int      @id @default(autoincrement())
+  createAt DateTime @default(now())
+  updateAt DateTime @updatedAt
+  todo     String?  @db.MediumText
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId   Int
+
+  @@index([userId])
+}
+
+model Product {
+  id        Int      @id @default(autoincrement())
+  createAt  DateTime @default(now())
+  updateAt  DateTime @updatedAt
+  storeName String   @db.MediumText
+  adress    String   @db.MediumText
+  flavor    String   @db.MediumText
+  review    String   @db.MediumText
+  fileUrl   String?  @db.MediumText
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    Int
+  Chats     Chats[]
+  Favs      Fav[]
+
+  @@index([userId])
+}
+
+model Chats {
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id        Int      @id @default(autoincrement())
+  createAt  DateTime @default(now())
+  message   String   @db.MediumText
+  updateAt  DateTime @updatedAt
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  userId    Int
+  productId Int
+
+  @@index([userId])
+  @@index([productId])
+}
+
+model Fav {
+  id        Int      @id @default(autoincrement())
+  createAt  DateTime @default(now())
+  updateAt  DateTime @updatedAt
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  userId    Int
+  productId Int
+
+  @@index([userId])
+  @@index([productId])
+}
